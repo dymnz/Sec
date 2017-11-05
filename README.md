@@ -3,3 +3,10 @@
 
 #### MIT course
 * [Computer Systems Security](https://ocw.mit.edu/courses/electrical-engineering-and-computer-science/6-858-computer-systems-security-fall-2014/index.htm)
+
+
+
+
+
+#### Misc
+* Set TTY font size: `sudo dpkg-reconfigure console-setup`
