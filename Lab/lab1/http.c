@@ -33,6 +33,7 @@ int http_read_line(int fd, char *buf, size_t size)
 
     for (;;)
     {
+        // Read 1 byte from fd to buf[i]
         int cc = read(fd, &buf[i], 1);
         if (cc <= 0)
             break;
@@ -73,6 +74,7 @@ const char *http_request_line(int fd, char *reqpath, char *env, size_t *env_len)
         return "Socket IO error";
 
     /* Parse request like "GET /foo.html HTTP/1.0" */
+    // strchr() find character in string
     sp1 = strchr(buf, ' ');
     if (!sp1)
         return "Cannot parse HTTP request (1)";
