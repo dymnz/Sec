@@ -108,10 +108,14 @@ const char *http_request_line(int fd, char *reqpath, char *env, size_t *env_len)
     /**
      * void url_decode(char *dst, const char *src);
      * reqpath buffer overflow when sp1 does not contain '\0'
-     * but `buf` is null terminated properly.
+     * But `buf` is null terminated properly, so no overflow here
      */
     url_decode(reqpath, sp1);
 
+    /**
+     * BUG:
+     * reqpath > 1024 byte will overflow http_serve()
+     */
     envp += sprintf(envp, "REQUEST_URI=%s", reqpath) + 1;
 
     envp += sprintf(envp, "SERVER_NAME=zoobar.org") + 1;
@@ -277,7 +281,13 @@ valid_cgi_script(struct stat *st)
 
     return 1;
 }
-
+/**
+ * BUG:
+ * Entry point for http_serve_directory()`
+ * `name` can be used to overflow `pn` then
+ * 1. Overwrite the default of `handler`
+ * 2. Exploit buffer overflow in http_serve_directory()
+ */
 void http_serve(int fd, const char *name)
 {
     void (*handler)(int, const char *) = http_serve_none;

@@ -44,6 +44,11 @@ int main(int argc, char **argv)
             if ((errmsg = http_request_headers(sockfd)))
                 http_err(sockfd, 500, "http_request_headers: %s", errmsg);
             else
+                /**
+                 * BUG: Entry point for http_serve()
+                 * Buffer overflow when getenv("REQUEST_URI") longer than 
+                 * 1024 bytes
+                 */
                 http_serve(sockfd, getenv("REQUEST_URI"));
             return 0;
         default: /* parent */
