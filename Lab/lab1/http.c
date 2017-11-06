@@ -62,6 +62,7 @@ int http_read_line(int fd, char *buf, size_t size)
     return -1;
 }
 
+// Checked
 const char *http_request_line(int fd, char *reqpath, char *env, size_t *env_len)
 {
     static char buf[8192];      /* static variables are not on the stack */
@@ -104,6 +105,11 @@ const char *http_request_line(int fd, char *reqpath, char *env, size_t *env_len)
     }
 
     /* decode URL escape sequences in the requested path into reqpath */
+    /**
+     * void url_decode(char *dst, const char *src);
+     * reqpath buffer overflow when sp1 does not contain '\0'
+     * but `buf` is null terminated properly.
+     */
     url_decode(reqpath, sp1);
 
     envp += sprintf(envp, "REQUEST_URI=%s", reqpath) + 1;
@@ -342,6 +348,11 @@ void http_serve_file(int fd, const char *pn)
     close(filefd);
 }
 
+/**
+ * BUG: strcpy()
+ * If dirname is not null-terminated, buffer overflow may happen
+ * in `dst`
+ */
 void dir_join(char *dst, const char *dirname, const char *filename) {
     strcpy(dst, dirname);
     if (dst[strlen(dst) - 1] != '/')
@@ -357,6 +368,10 @@ void http_serve_directory(int fd, const char *pn) {
     int i;
 
     for (i = 0; indices[i]; i++) {
+        /**
+         * BUG:
+         * Buffer overflow at name if pn is not null-terminated
+         */
         dir_join(name, pn, indices[i]);
         if (stat(name, &st) == 0 && S_ISREG(st.st_mode)) {
             dir_join(name, getenv("SCRIPT_NAME"), indices[i]);
@@ -436,6 +451,7 @@ void http_serve_executable(int fd, const char *pn)
     }
 }
 
+// No size contraint, run until '\0'
 void url_decode(char *dst, const char *src)
 {
     for (;;)
